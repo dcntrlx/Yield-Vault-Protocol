@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
+import {console} from "forge-std/console.sol";
 import {MockToken} from "../src/MockToken.sol";
 
 contract MockTokenTest is Test {
@@ -29,7 +30,15 @@ contract MockTokenTest is Test {
         assertEq(token.balanceOf(address(this)), inititalBalance - summ, "Sender's balance should decrease");
     }
 
-    function test_allowance() public {
+    function test_mint() public {
+        address user = makeAddr("user");
+        uint256 amount = 20000;
+
+        token.mint(user, amount);
+        assertEq(token.balanceOf(user), amount);
+    }
+
+    function test_transferFrom() public {
         uint256 summ = 100;
         address spender = makeAddr("spender");
         address owner = address(this);
