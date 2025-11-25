@@ -12,18 +12,18 @@ contract Vault is ERC20, IERC4626 {
     using SafeERC20 for IERC20;
     using Math for uint256;
 
-    IERC20 private immutable _asset; // Definition of the asset token
+    IERC20 private immutable ASSET; // Definition of the asset token
 
     constructor(IERC20 assetToken_) ERC20("Share Vault Token", "SVT") {
-        _asset = assetToken_;
+        ASSET = assetToken_;
     }
 
     function asset() external view override returns (address assetTokenAddress) {
-        assetTokenAddress = address(_asset);
+        assetTokenAddress = address(ASSET);
     }
 
-    function totalAssets() external view returns (uint256 totalManagedAssets) {
-        totalManagedAssets = _asset.balanceOf(address(this)); // May be not correct if tokens during strategy are sent to different place
+    function totalAssets() public view returns (uint256 totalManagedAssets) {
+        totalManagedAssets = ASSET.balanceOf(address(this)); // May be not correct if tokens during strategy are sent to different place
     }
 
     function convertToShares(uint256 assets) public view override returns (uint256 shares) {
@@ -35,7 +35,14 @@ contract Vault is ERC20, IERC4626 {
     }
 
     // Deposit block
-    function maxDeposit(address receiver) public view override returns (uint256 maxAssets) {
+    function maxDeposit(
+        address /*receiver*/
+    )
+        public
+        pure
+        override
+        returns (uint256 maxAssets)
+    {
         maxAssets = type(uint256).max;
     }
 
@@ -47,13 +54,19 @@ contract Vault is ERC20, IERC4626 {
         require(assets <= maxDeposit(receiver));
         shares = _convertToShares(assets, Math.Rounding.Floor);
         require(shares > 0, "Your assets is not enough to mint a single share"); // User protection. Not required by EIP4626
-        _asset.safeTransferFrom(msg.sender, address(this), assets);
+        ASSET.safeTransferFrom(msg.sender, address(this), assets);
         _mint(receiver, shares);
         emit Deposit(msg.sender, receiver, assets, shares);
     }
 
     // Mint block
-    function maxMint(address receiver) public view returns (uint256 maxShares) {
+    function maxMint(
+        address /*receiver*/
+    )
+        public
+        pure
+        returns (uint256 maxShares)
+    {
         maxShares = type(uint256).max;
     }
 
@@ -64,7 +77,7 @@ contract Vault is ERC20, IERC4626 {
     function mint(uint256 shares, address receiver) external returns (uint256 assets) {
         require(shares <= maxMint(receiver), "Shares to be minted will exceed the limit");
         assets = _convertToAssets(shares, Math.Rounding.Ceil);
-        _asset.safeTransferFrom(msg.sender, address(this), assets);
+        ASSET.safeTransferFrom(msg.sender, address(this), assets);
         _mint(receiver, shares);
         emit Deposit(msg.sender, receiver, assets, shares);
     }
@@ -85,7 +98,7 @@ contract Vault is ERC20, IERC4626 {
         }
         require(balanceOf(owner) >= shares, "You dont have enough shares to withdraw this amount of assets");
         _burn(owner, shares);
-        _asset.safeTransfer(receiver, assets);
+        ASSET.safeTransfer(receiver, assets);
         emit Withdraw(msg.sender, receiver, owner, assets, shares);
     }
 
@@ -105,7 +118,7 @@ contract Vault is ERC20, IERC4626 {
         assets = _convertToAssets(shares, Math.Rounding.Floor);
         require(assets > 0, "You will not get any single share for this amount of assets");
         _burn(owner, shares);
-        _asset.safeTransfer(receiver, assets);
+        ASSET.safeTransfer(receiver, assets);
         emit Withdraw(msg.sender, receiver, owner, assets, shares);
     }
 

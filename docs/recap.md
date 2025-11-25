@@ -13,3 +13,4 @@
 12. Visibility of functions realized from interface implemented can become more accessible e.g. external -> public, but not in the other direction
 13 It's reccommende to use uint256 instead of uint for explicity and style. if fact uint = uint256
 14. type(uint256).max must be used to get max of type. It's more clear and optimized and the only correct such 2**256 is not correct at all
+15. new instances of contract can be created using `new Contract()`
