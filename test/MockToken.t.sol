@@ -24,7 +24,7 @@ contract MockTokenTest is Test {
         bool success = token.transfer(receiver, summ);
         assertTrue(success, "Transfer returned not True");
 
-        assertEq(token.balanceOf(receiver), summ, "Receiver balance must increse");
+        assertEq(token.balanceOf(receiver), summ, "Receiver balance must increase");
 
         assertEq(token.balanceOf(address(this)), inititalBalance - summ, "Sender's balance should decrease");
     }

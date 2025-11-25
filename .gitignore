@@ -10,4 +10,5 @@ out/
 # Dotenv file
 .env
 
-docs/plan.md
+# project's docs
+docs/
