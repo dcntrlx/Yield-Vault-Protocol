@@ -67,4 +67,32 @@ contract VaultTest is Test {
         assertEq(sharesWithdrown, shares, "Shares before and after loop must be the same value(here)");
         vm.stopPrank();
     }
+
+    function test_inflation_attack() public {
+        // simulating an inflation attack
+        address attacker = makeAddr("Attacker");
+        address victim = makeAddr("Victim");
+
+        vm.prank(tokenDeployer);
+        token.mint(attacker, 10 ** 18);
+
+        vm.startPrank(attacker);
+        token.approve(address(vault), 1);
+        uint256 shares = vault.deposit(1, attacker);
+        token.transfer(address(vault), 10 ** 17);
+        uint256 tokensPerShare = vault.convertToAssets(1);
+        console.log("Tokens per share", tokensPerShare);
+        vm.stopPrank();
+
+        vm.prank(tokenDeployer);
+        uint256 assetsToDeposit = 10 ** 15;
+        token.mint(victim, assetsToDeposit);
+
+        vm.startPrank(victim);
+        token.approve(address(vault), assetsToDeposit);
+
+        vm.expectRevert("Your assets is not enough to mint a single share"); // This version will not allow to lost assets during an inflation attack, but
+        uint256 sharesForDepositedAssets = vault.deposit(assetsToDeposit, victim); // inflation attack makes vault useless. Also in less user-friendly vault
+        // realization victim's assets will be lost and attacker will get them.
+    }
 }
