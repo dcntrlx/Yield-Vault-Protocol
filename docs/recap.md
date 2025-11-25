@@ -12,3 +12,4 @@
 11. In EIP4626 we are checking for limits e.g maxMint, maxDeposit only in execution functions, not in preview functions
 12. Visibility of functions realized from interface implemented can become more accessible e.g. external -> public, but not in the other direction
 13 It's reccommende to use uint256 instead of uint for explicity and style. if fact uint = uint256
+14. type(uint256).max must be used to get max of type. It's more clear and optimized and the only correct such 2**256 is not correct at all

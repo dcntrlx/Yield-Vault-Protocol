@@ -36,7 +36,7 @@ contract Vault is ERC20, IERC4626 {
 
     // Deposit block
     function maxDeposit(address receiver) public view override returns (uint256 maxAssets) {
-        maxAssets = 2 ** 256 - 1;
+        maxAssets = type(uint256).max;
     }
 
     function previewDeposit(uint256 assets) external view returns (uint256 shares) {
@@ -54,7 +54,7 @@ contract Vault is ERC20, IERC4626 {
 
     // Mint block
     function maxMint(address receiver) public view returns (uint256 maxShares) {
-        maxShares = 2 * 256 - totalSupply();
+        maxShares = type(uint256).max;
     }
 
     function previewMint(uint256 shares) external view returns (uint256 assets) {
@@ -64,7 +64,7 @@ contract Vault is ERC20, IERC4626 {
     function mint(uint256 shares, address receiver) external returns (uint256 assets) {
         require(shares <= maxMint(receiver), "Shares to be minted will exceed the limit");
         assets = _convertToAssets(shares, Math.Rounding.Ceil);
-        _asset.saveTransferFrom(msg.sender, address(this), assets);
+        _asset.safeTransferFrom(msg.sender, address(this), assets);
         _mint(receiver, shares);
         emit Deposit(msg.sender, receiver, assets, shares);
     }
@@ -80,9 +80,12 @@ contract Vault is ERC20, IERC4626 {
 
     function withdraw(uint256 assets, address receiver, address owner) external returns (uint256 shares) {
         shares = _convertToShares(assets, Math.Rounding.Ceil);
+        if (owner != msg.sender) {
+            _spendAllowance(owner, msg.sender, shares);
+        }
         require(balanceOf(owner) >= shares, "You dont have enough shares to withdraw this amount of assets");
         _burn(owner, shares);
-        saveTransfer(receiver, assets);
+        _asset.safeTransfer(receiver, assets);
         emit Withdraw(msg.sender, receiver, owner, assets, shares);
     }
 
@@ -96,14 +99,17 @@ contract Vault is ERC20, IERC4626 {
     }
 
     function redeem(uint256 shares, address receiver, address owner) external returns (uint256 assets) {
+        if (msg.sender != owner) {
+            _spendAllowance(owner, msg.sender, shares);
+        }
         assets = _convertToAssets(shares, Math.Rounding.Floor);
-        require(assets >= 0, "You will not get any single share for this amount of assets");
+        require(assets > 0, "You will not get any single share for this amount of assets");
         _burn(owner, shares);
-        safeTransfer(receiver, assets);
+        _asset.safeTransfer(receiver, assets);
         emit Withdraw(msg.sender, receiver, owner, assets, shares);
     }
 
-    function _convertToShares(uint256 assets) internal view returns (uint256 shares, Math.Rounding rounding) {
+    function _convertToShares(uint256 assets, Math.Rounding rounding) internal view returns (uint256 shares) {
         shares = assets.mulDiv(totalSupply() + 1, totalAssets() + 1, rounding);
     }
 
