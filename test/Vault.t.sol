@@ -12,6 +12,7 @@ contract VaultTest is Test {
     address public tokenDeployer = makeAddr("tokenDeployer");
 
     function _createUnderlyingToken() internal {
+        // Establishing underlying mock token to use in vault
         vm.prank(tokenDeployer);
         token = new MockToken();
     }
@@ -22,6 +23,7 @@ contract VaultTest is Test {
     }
 
     function test_convertToShares() public {
+        // Verify conversion from assets to shares
         uint256 assets = 100000;
         uint256 shares = vault.convertToShares(assets);
         assertEq(shares, assets);
@@ -29,16 +31,19 @@ contract VaultTest is Test {
 
     function test_convertToAssets() public {
         uint256 shares = 100000;
+        // Verify conversion from shares to assets
         uint256 assets = vault.convertToAssets(shares);
         assertEq(assets, shares);
     }
 
     function test_isAssetCorrect() public {
+        // Verify the underlying asset is correct
         assertEq(vault.asset(), address(token));
         console.log("Token: ", address(token));
     }
 
     function _deposit(uint256 amount) internal returns (address depositor, uint256 shares) {
+        // simulate deposit
         uint256 assets = amount;
         depositor = makeAddr("Depositor");
 
@@ -55,10 +60,12 @@ contract VaultTest is Test {
     }
 
     function test_deposit() public {
+        // Test deposit
         (address depositor, uint256 shares) = _deposit(10000);
     }
 
     function test_withdraw() public {
+        // Test withdrawal functionality. Dipositting at first.
         uint256 assets = 100000;
         (address depositor, uint256 shares) = _deposit(assets);
         vm.startPrank(depositor);

@@ -13,12 +13,14 @@ contract MockTokenTest is Test {
     }
 
     function test_constructing() public view {
+        // Initial token constructing test
         assertEq(token.name(), "MockToken");
         uint256 creator_balance = token.balanceOf(address(this));
         assertEq(creator_balance, 1000000 * 10 ** token.decimals());
     }
 
     function test_transfer() public {
+        // Test standard transfer function
         uint256 summ = 100;
         address receiver = address(0x123);
         uint256 inititalBalance = token.balanceOf(address(this));
@@ -31,6 +33,7 @@ contract MockTokenTest is Test {
     }
 
     function test_mint() public {
+        // Verify mint
         address user = makeAddr("user");
         uint256 amount = 20000;
 
@@ -39,6 +42,7 @@ contract MockTokenTest is Test {
     }
 
     function test_transferFrom() public {
+        // Verify transferFrom and allowance
         uint256 summ = 100;
         address spender = makeAddr("spender");
         address owner = address(this);
@@ -58,6 +62,7 @@ contract MockTokenTest is Test {
     }
 
     function testRevert_transferToZeroAddress() public {
+        // Verify revert on transfer to addres(0)
         vm.expectRevert(abi.encodeWithSignature("ERC20InvalidReceiver(address)", address(0)));
         token.transfer(address(0), 100);
     }

@@ -12,6 +12,7 @@ contract ProtectedVaultTest is Test {
     address public tokenDeployer = makeAddr("tokenDeployer");
 
     function _createUnderlyingToken() internal {
+        // Establishing underlying mock token to use in vault
         vm.prank(tokenDeployer);
         token = new MockToken();
     }
